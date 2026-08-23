@@ -1,0 +1,11 @@
+{
+  "model_version": "omr-scorer-v1",
+  "architecture": "Linear(80,16) -> ReLU -> Linear(16,1)",
+  "input_format": "80-float vector: 20 questions x 4 one-hot options (A/B/C/D)",
+  "output_format": "single float, score out of 100",
+  "num_questions": 20,
+  "num_options": 4,
+  "training_samples": 4000,
+  "validation_samples": 400,
+  "note": "Trained on synthetic data only. No real candidate data was used."
+}

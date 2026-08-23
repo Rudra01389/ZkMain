@@ -1,0 +1,21 @@
+.venv/
+node_modules/
+dist/
+*.log
+__pycache__/
+*.pyc
+
+# Proving key is ~300MB and fully reproducible via ml/circuit/build_circuit.py
+ml/circuit/artifacts/pk.key
+ml/circuit/artifacts/tmp/
+ml/circuit/artifacts/proofs/
+
+# Per-run evaluation/audit data is synthetic demo output, regenerated on each run
+backend/data/evaluations/*.json
+backend/data/audit/*.json
+backend/data/uploads/*.pdf
+!backend/data/evaluations/.gitkeep
+!backend/data/audit/.gitkeep
+!backend/data/uploads/.gitkeep
+
+.DS_Store
