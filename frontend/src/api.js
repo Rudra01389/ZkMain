@@ -24,9 +24,23 @@ export const api = {
     if (!res.ok) throw new Error(data.error || `Upload failed with ${res.status}`);
     return data;
   },
+  getEvaluation: (evaluationId) => request(`/evaluate/${evaluationId}`),
+  createTeacherEvaluation: async (formData) => {
+    const res = await fetch(`${API_BASE}/evaluate/teacher`, { method: "POST", body: formData });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `Evaluation creation failed with ${res.status}`);
+    return data;
+  },
   uploadedFileUrl: (evaluationId) => `${API_BASE}/evaluate/upload/${evaluationId}/file`,
   verify: (evaluationId) => request("/verify", { method: "POST", body: JSON.stringify({ evaluationId }) }),
   auditBatch: (batchId) => request(`/audit/${batchId}`),
   validateAudit: (batchId) => request(`/audit/${batchId}/validate`, { method: "POST" }),
   tamper: (scenario) => request(`/tamper/${scenario}`, { method: "POST", body: JSON.stringify({}) }),
+  getReview: (evaluationId) => request(`/review/${evaluationId}`),
+  acceptReview: (evaluationId, payload) =>
+    request(`/review/${evaluationId}/accept`, { method: "POST", body: JSON.stringify(payload) }),
+  rejectReview: (evaluationId, payload) =>
+    request(`/review/${evaluationId}/reject`, { method: "POST", body: JSON.stringify(payload) }),
+  finalizeReview: (evaluationId, payload) =>
+    request(`/review/${evaluationId}/finalize`, { method: "POST", body: JSON.stringify(payload) }),
 };

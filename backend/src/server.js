@@ -6,6 +6,7 @@ const verifyRoute = require("./routes/verify");
 const auditRoute = require("./routes/audit");
 const modelRoute = require("./routes/model");
 const tamperRoute = require("./routes/tamper");
+const reviewRoute = require("./routes/review");
 const { ensureDirs } = require("./services/store");
 
 const app = express();
@@ -23,6 +24,7 @@ app.use("/api/verify", verifyRoute);
 app.use("/api/audit", auditRoute);
 app.use("/api/model", modelRoute);
 app.use("/api/tamper", tamperRoute);
+app.use("/api/review", reviewRoute);
 
 app.use((req, res) => res.status(404).json({ error: "not found" }));
 // eslint-disable-next-line no-unused-vars

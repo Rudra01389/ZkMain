@@ -458,6 +458,37 @@ table.eval-table tbody tr.selected { background: var(--primary-tint); }
 }
 .pdf-link:hover { text-decoration: underline; }
 
+/* ---------- Rubric criteria builder (Teacher create evaluation) ---------- */
+
+.criteria-builder { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.criteria-input-row { display: flex; align-items: center; gap: 8px; }
+.criteria-input-row input { flex: 1; }
+.remove-criterion-btn {
+  padding: 4px 10px;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--fail);
+  border-color: var(--border);
+}
+.remove-criterion-btn:hover:not(:disabled) { border-color: var(--fail); color: var(--fail); }
+
+/* ---------- Review & escalation ---------- */
+
+.review-history { display: flex; flex-direction: column; gap: 10px; margin: 10px 0; }
+.review-history-item { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.review-history-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+.review-history-body { font-size: 0.85rem; }
+
+.decision-badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-weight: 700;
+  font-size: 0.72rem;
+}
+.decision-badge.accept { background: var(--ok-tint); color: var(--ok); }
+.decision-badge.reject { background: var(--fail-tint); color: var(--fail); }
+
 .mock-note {
   font-size: 0.72rem;
   color: var(--warn);

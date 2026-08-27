@@ -6,17 +6,11 @@ import ExaminerDashboard from "./pages/ExaminerDashboard";
 import AuditorDashboard from "./pages/AuditorDashboard";
 import "./App.css";
 
-const ROLE_LABEL = { candidate: "Candidate", examiner: "Examiner", auditor: "Auditor" };
+const ROLE_LABEL = { candidate: "Student / Candidate", examiner: "Teacher / Examiner", auditor: "Auditor" };
 
 function App() {
   const [view, setView] = useState("landing");
   const [apiUp, setApiUp] = useState(null);
-  const [pendingEvaluationId, setPendingEvaluationId] = useState(null);
-
-  const viewVerification = (evaluationId) => {
-    setPendingEvaluationId(evaluationId);
-    setView("auditor");
-  };
 
   useEffect(() => {
     api.health().then(() => setApiUp(true)).catch(() => setApiUp(false));
@@ -46,9 +40,9 @@ function App() {
       </div>
 
       <main className="main">
-        {view === "candidate" && <CandidateDashboard onViewVerification={viewVerification} />}
+        {view === "candidate" && <CandidateDashboard />}
         {view === "examiner" && <ExaminerDashboard />}
-        {view === "auditor" && <AuditorDashboard initialEvaluationId={pendingEvaluationId} />}
+        {view === "auditor" && <AuditorDashboard />}
       </main>
     </div>
   );

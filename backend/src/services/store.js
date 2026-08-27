@@ -1,10 +1,11 @@
 const fs = require("fs");
 const path = require("path");
-const { EVALUATIONS_DIR, AUDIT_DIR } = require("./paths");
+const { EVALUATIONS_DIR, AUDIT_DIR, REVIEWS_DIR } = require("./paths");
 
 function ensureDirs() {
   fs.mkdirSync(EVALUATIONS_DIR, { recursive: true });
   fs.mkdirSync(AUDIT_DIR, { recursive: true });
+  fs.mkdirSync(REVIEWS_DIR, { recursive: true });
 }
 
 function readJson(filePath, fallback = null) {
@@ -26,6 +27,10 @@ function privateEvaluationPath(evaluationId) {
 
 function batchAuditPath(batchId) {
   return path.join(AUDIT_DIR, `${batchId}.json`);
+}
+
+function reviewPath(evaluationId) {
+  return path.join(REVIEWS_DIR, `${evaluationId}.json`);
 }
 
 function saveEvaluation(record) {
@@ -69,6 +74,15 @@ function listBatches() {
   return fs.readdirSync(AUDIT_DIR).filter((f) => f.endsWith(".json")).map((f) => f.replace(/\.json$/, ""));
 }
 
+function loadReview(evaluationId) {
+  return readJson(reviewPath(evaluationId));
+}
+
+function saveReview(evaluationId, reviewRecord) {
+  ensureDirs();
+  writeJson(reviewPath(evaluationId), reviewRecord);
+}
+
 module.exports = {
   ensureDirs,
   readJson,
@@ -81,7 +95,10 @@ module.exports = {
   loadAuditChain,
   saveAuditChain,
   listBatches,
+  loadReview,
+  saveReview,
   evaluationPath,
   privateEvaluationPath,
   batchAuditPath,
+  reviewPath,
 };

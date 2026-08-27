@@ -11,6 +11,7 @@ const DATA_DIR = path.join(__dirname, "..", "..", "data");
 const EVALUATIONS_DIR = path.join(DATA_DIR, "evaluations");
 const AUDIT_DIR = path.join(DATA_DIR, "audit");
 const UPLOADS_DIR = path.join(DATA_DIR, "uploads");
+const REVIEWS_DIR = path.join(DATA_DIR, "reviews");
 
 module.exports = {
   PROJECT_ROOT,
@@ -23,4 +24,5 @@ module.exports = {
   EVALUATIONS_DIR,
   AUDIT_DIR,
   UPLOADS_DIR,
+  REVIEWS_DIR,
 };

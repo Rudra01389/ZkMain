@@ -1,6 +1,20 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
 import { RUBRIC_VERSION } from "../constants";
+import ReviewPanel from "../ReviewPanel";
+import CreateEvaluationPanel from "../CreateEvaluationPanel";
+
+// Some evaluations were created via the teacher rubric-builder (maxMarks +
+// displayScore already scaled to it); older/demo evaluations only have the
+// legacy displayScore10 (always out of 10). This falls back gracefully so
+// both render the same way.
+function scoreOutOfMax(e) {
+  if (typeof e.maxMarks === "number" && typeof e.displayScore === "number") {
+    return { score: e.displayScore, max: e.maxMarks };
+  }
+  if (typeof e.displayScore10 === "number") return { score: e.displayScore10, max: 10 };
+  return { score: Math.round(((e.claimedScore || 0) / 100) * 10 * 10) / 10, max: 10 };
+}
 
 const MOCK_CRITERIA = ["Concept Coverage", "Terminology Accuracy", "Relevance to Question", "Clarity & Structure", "Completeness"];
 
@@ -28,9 +42,10 @@ function mockCriteriaBreakdown(evaluationId, score) {
   });
 }
 
-function scoreBand(score) {
-  if (score >= 70) return "";
-  if (score >= 40) return "mid";
+function scoreBand(score, max) {
+  const pct = max > 0 ? (score / max) * 100 : 0;
+  if (pct >= 70) return "";
+  if (pct >= 40) return "mid";
   return "low";
 }
 
@@ -62,19 +77,35 @@ export default function ExaminerDashboard() {
   };
 
   const total = evaluations.length;
-  const avgScore = total > 0 ? Math.round(evaluations.reduce((s, e) => s + (e.claimedScore || 0), 0) / total) : 0;
+  const avgPct =
+    total > 0
+      ? Math.round(
+          evaluations.reduce((s, e) => {
+            const { score, max } = scoreOutOfMax(e);
+            return s + (max > 0 ? (score / max) * 100 : 0);
+          }, 0) / total
+        )
+      : 0;
   const candidates = new Set(evaluations.map((e) => e.candidateId)).size;
   const batches = new Set(evaluations.map((e) => e.batchId)).size;
 
   const selected = evaluations.find((e) => e.evaluationId === selectedId);
   const selectedProof = selectedId ? proofStatus[selectedId] : null;
 
+  const onCreated = (evaluation) => {
+    setEvaluations((prev) => [evaluation, ...prev]);
+    selectRow(evaluation.evaluationId);
+  };
+
   return (
     <div>
-      <h2 style={{ marginBottom: 4 }}>Examiner Dashboard</h2>
+      <h2 style={{ marginBottom: 4 }}>Teacher / Examiner Dashboard</h2>
       <p className="muted" style={{ marginBottom: 20 }}>
-        Review AI evaluations submitted by candidates across all exams.
+        Create evaluations, generate AI scores with ZK proofs, and review results — including the Final Authority step
+        when an AI score is escalated.
       </p>
+
+      <CreateEvaluationPanel onCreated={onCreated} />
 
       <div className="stat-grid">
         <div className="stat-card">
@@ -83,10 +114,10 @@ export default function ExaminerDashboard() {
         </div>
         <div className="stat-card">
           <div className="stat-label">Average AI Score</div>
-          <div className="stat-value">{avgScore}</div>
+          <div className="stat-value">{avgPct}%</div>
         </div>
         <div className="stat-card">
-          <div className="stat-label">Candidates</div>
+          <div className="stat-label">Students</div>
           <div className="stat-value">{candidates}</div>
         </div>
         <div className="stat-card">
@@ -102,13 +133,13 @@ export default function ExaminerDashboard() {
           <h2>Evaluations</h2>
           {loadingList && <p className="muted">Loading...</p>}
           {!loadingList && total === 0 && (
-            <div className="empty-state">No evaluations yet. Submit one from the Candidate dashboard.</div>
+            <div className="empty-state">No evaluations yet. Create one above.</div>
           )}
           {total > 0 && (
             <table className="eval-table">
               <thead>
                 <tr>
-                  <th>Candidate</th>
+                  <th>Student</th>
                   <th>Exam</th>
                   <th>Question</th>
                   <th>AI Score</th>
@@ -116,23 +147,26 @@ export default function ExaminerDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {evaluations.map((e) => (
-                  <tr
-                    key={e.evaluationId}
-                    className={e.evaluationId === selectedId ? "selected" : ""}
-                    onClick={() => selectRow(e.evaluationId)}
-                  >
-                    <td className="mono small">{e.candidateId}</td>
-                    <td>{e.batchId}</td>
-                    <td>{e.question ? `${e.question.slice(0, 40)}${e.question.length > 40 ? "..." : ""}` : "—"}</td>
-                    <td>
-                      <span className={`score-pill ${scoreBand(e.claimedScore || 0)}`}>
-                        {Math.round(e.claimedScore || 0)}/100
-                      </span>
-                    </td>
-                    <td className="muted">{new Date(e.timestamp).toLocaleString()}</td>
-                  </tr>
-                ))}
+                {evaluations.map((e) => {
+                  const { score, max } = scoreOutOfMax(e);
+                  return (
+                    <tr
+                      key={e.evaluationId}
+                      className={e.evaluationId === selectedId ? "selected" : ""}
+                      onClick={() => selectRow(e.evaluationId)}
+                    >
+                      <td className="mono small">{e.studentId || e.candidateId}</td>
+                      <td>{e.examSubject || e.batchId}</td>
+                      <td>{e.question ? `${e.question.slice(0, 40)}${e.question.length > 40 ? "..." : ""}` : "—"}</td>
+                      <td>
+                        <span className={`score-pill ${scoreBand(score, max)}`}>
+                          {score}/{max}
+                        </span>
+                      </td>
+                      <td className="muted">{new Date(e.timestamp).toLocaleString()}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
@@ -144,8 +178,8 @@ export default function ExaminerDashboard() {
           {selected && (
             <div>
               <div className="score-hero">
-                <span className="value">{Math.round(selected.claimedScore || 0)}</span>
-                <span className="of">/ 100</span>
+                <span className="value">{scoreOutOfMax(selected).score}</span>
+                <span className="of">/ {scoreOutOfMax(selected).max}</span>
               </div>
 
               {selectedProof === "checking" && (
@@ -162,12 +196,14 @@ export default function ExaminerDashboard() {
               <dl>
                 <dt>Evaluation ID</dt>
                 <dd className="mono small">{selected.evaluationId}</dd>
-                <dt>Candidate</dt>
-                <dd>{selected.candidateId}</dd>
+                <dt>Student</dt>
+                <dd>{selected.studentId || selected.candidateId}</dd>
+                <dt>Question</dt>
+                <dd>{selected.question || "—"}</dd>
                 <dt>Model</dt>
                 <dd className="mono small">{selected.modelCommitment?.slice(0, 24)}...</dd>
                 <dt>Rubric</dt>
-                <dd>{RUBRIC_VERSION}</dd>
+                <dd>{selected.criteria?.length ? `${selected.criteria.length} teacher-defined criteria` : RUBRIC_VERSION}</dd>
                 <dt>Timestamp</dt>
                 <dd>{new Date(selected.timestamp).toLocaleString()}</dd>
                 {selected.sourceType === "pdf-upload" && (
@@ -225,6 +261,8 @@ export default function ExaminerDashboard() {
           )}
         </div>
       </div>
+
+      {selected && <ReviewPanel evaluation={selected} proofStatus={selectedProof} />}
     </div>
   );
 }

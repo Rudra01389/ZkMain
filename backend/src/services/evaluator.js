@@ -181,8 +181,23 @@ function evaluateAnswer(questionId, studentAnswer) {
   };
 }
 
+const MAX_TEACHER_CRITERIA = RUBRIC_SIZE;
+
+// Maps an arbitrary teacher-defined rubric (1..RUBRIC_SIZE criteria) onto the
+// certified circuit's fixed 20 slots by cycling through the criteria list.
+// Each returned entry is an index into the teacher's criteria array, so every
+// criterion gets a roughly equal share of the 20 slots and the existing
+// certified model/circuit/proving key are reused completely unchanged.
+function buildCriteriaSlotMap(criteriaCount) {
+  if (!Number.isInteger(criteriaCount) || criteriaCount < 1 || criteriaCount > MAX_TEACHER_CRITERIA) {
+    throw new Error(`rubric must have between 1 and ${MAX_TEACHER_CRITERIA} criteria`);
+  }
+  return Array.from({ length: RUBRIC_SIZE }, (_, i) => i % criteriaCount);
+}
+
 module.exports = {
   RUBRIC_SIZE,
+  MAX_TEACHER_CRITERIA,
   CERTIFIED_ANSWER_KEY,
   QUESTIONS,
   getQuestion,
@@ -190,4 +205,5 @@ module.exports = {
   getCriteriaPhrases,
   encodeHits,
   evaluateAnswer,
+  buildCriteriaSlotMap,
 };

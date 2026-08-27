@@ -1,31 +1,34 @@
 const ROLES = [
   {
-    id: "candidate",
-    icon: "👨‍🎓",
-    title: "Candidate",
-    description: "Submit answers & view results",
+    id: "examiner",
+    icon: "👨‍🏫",
+    title: "Teacher / Examiner",
+    description: "Create evaluations, generate AI scores and review AI results.",
   },
   {
-    id: "examiner",
-    icon: "🏛",
-    title: "Examiner",
-    description: "View AI evaluations",
+    id: "candidate",
+    icon: "👨‍🎓",
+    title: "Student / Candidate",
+    description: "View and independently verify your evaluation.",
   },
   {
     id: "auditor",
     icon: "🔍",
     title: "Auditor",
-    description: "Verify evaluation proofs",
+    description: "Inspect the complete evaluation and audit history.",
   },
 ];
 
 export default function LandingPage({ onSelectRole }) {
   return (
     <div className="landing">
-      <h1>Cryptographically Verifiable AI-Based Evaluation</h1>
+      <h1>AI Evaluation Portal</h1>
       <p className="subtitle">
         A zero-knowledge proof pipeline (EZKL / Halo2) proves every AI-generated score without revealing model
-        weights or a candidate's raw answer, backed by a tamper-evident audit trail.
+        weights or a student's raw answer, backed by a 2-level human review and a tamper-evident audit trail.
+      </p>
+      <p className="subtitle" style={{ marginTop: -32, fontWeight: 600 }}>
+        Choose your role
       </p>
 
       <div className="role-grid">

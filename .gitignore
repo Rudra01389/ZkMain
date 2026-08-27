@@ -14,8 +14,10 @@ ml/circuit/artifacts/proofs/
 backend/data/evaluations/*.json
 backend/data/audit/*.json
 backend/data/uploads/*.pdf
+backend/data/reviews/*.json
 !backend/data/evaluations/.gitkeep
 !backend/data/audit/.gitkeep
 !backend/data/uploads/.gitkeep
+!backend/data/reviews/.gitkeep
 
 .DS_Store
